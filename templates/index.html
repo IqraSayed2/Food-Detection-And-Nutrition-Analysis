@@ -1,416 +1,706 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-    <title>Food Detection System</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NUTRISCAN AI | PRECISION FUEL</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <!-- GSAP + ScrollTrigger -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <!-- Lenis Smooth Scroll -->
+    <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
+
     <style>
         :root {
-            --primary-color: #4361ee;
-            --secondary-color: #f8f9fa;
-            --accent-color: #4cc9f0;
-            --text-color: #2b2d42;
-            --border-radius: 12px;
-            --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            --card-bg: #ffffff;
+            --black: #000;
+            --white: #fff;
+            --orange: #FF4D00;
+            --yellow: #FFE600;
+            --bg: #EFEFEF;
+            --border: 4px solid var(--black);
+            --shadow: 6px 6px 0 var(--black);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: auto;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-            background: linear-gradient(135deg, #f6f8ff 0%, #ffffff 100%);
-            color: var(--text-color);
-            min-height: 100vh;
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg);
+            color: var(--black);
+            overflow-x: hidden;
         }
 
-        .main-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 2rem;
+        /* === Reusable === */
+        .card {
+            background: var(--white);
+            border: var(--border);
+            box-shadow: var(--shadow);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 30px;
+            font-weight: 900;
+            font-size: 1rem;
+            text-transform: uppercase;
+            text-decoration: none;
+            cursor: pointer;
+            border: var(--border);
+            box-shadow: 4px 4px 0 var(--black);
+            transition: transform 0.15s, box-shadow 0.15s;
+            font-family: 'Outfit', sans-serif;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .btn:hover::after {
+            transform: translateX(0);
+        }
+
+        .btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0 var(--black);
+        }
+
+        .btn-orange {
+            background: var(--orange);
+            color: var(--white);
+        }
+
+        .btn-yellow {
+            background: var(--yellow);
+            color: var(--black);
+        }
+
+        .btn-white {
+            background: var(--white);
+            color: var(--black);
+        }
+
+        /* === NAV === */
+        nav {
+            background: var(--white);
+            border-bottom: var(--border);
+            padding: 18px 40px;
+            display: flex;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--black);
+            font-weight: 900;
+            font-size: 1.6rem;
+            text-transform: uppercase;
+        }
+
+        .logo-icon {
+            background: var(--orange);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid var(--black);
+            color: var(--white);
+            flex-shrink: 0;
+        }
+
+        /* === HERO === */
+        .hero {
+            display: grid;
+            grid-template-columns: 1.1fr 1fr;
+            gap: 40px;
+            max-width: 1280px;
+            margin: 60px auto;
+            padding: 0 30px;
+            align-items: center;
+        }
+
+        .hero-left {
+            padding: 50px;
         }
 
         h1 {
-            text-align: center;
-            color: var(--text-color);
-            font-size: 2.5rem;
-            margin-bottom: 2rem;
-            font-weight: 700;
-            background: linear-gradient(120deg, var(--primary-color), var(--accent-color));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            padding: 1rem;
+            font-size: 4.8rem;
+            font-weight: 900;
+            line-height: 0.95;
+            text-transform: uppercase;
+            margin-bottom: 30px;
         }
 
-        .container {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 2rem;
-            margin-top: 1rem;
-        }
-
-        .panel {
-            background: var(--card-bg);
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            padding: 2rem;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .panel-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid #f0f3f9;
-        }
-
-        .panel-header h2 {
-            margin: 0;
-            font-size: 1.5rem;
-            color: var(--text-color);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .panel-header i {
-            color: var(--primary-color);
-        }
-
-        .upload-area {
-            border: 2px dashed var(--primary-color);
-            border-radius: var(--border-radius);
-            padding: 2rem;
-            text-align: center;
-            background: var(--secondary-color);
-            transition: all 0.3s ease;
-            margin-bottom: 1.5rem;
-        }
-
-        .upload-area:hover {
-            border-color: var(--accent-color);
-            background: #f0f7ff;
-        }
-
-        .button-group {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            margin-bottom: 1rem;
-        }
-
-        button, .custom-file-upload {
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 0.8rem 1.5rem;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-weight: 500;
-        }
-
-        button:hover, .custom-file-upload:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
-        }
-
-        .custom-file-upload {
-            background: white;
-            color: var(--primary-color);
-            border: 2px solid var(--primary-color);
-        }
-
-        .custom-file-upload:hover {
-            background: var(--primary-color);
-            color: white;
-        }
-
-        #fileInput {
-            display: none;
-        }
-
-        .image-container {
-            position: relative;
-            width: 100%;
-            min-height: 300px;
-            background: var(--secondary-color);
-            border-radius: var(--border-radius);
+        .split-line {
             overflow: hidden;
-            margin-top: 1rem;
+            display: block;
         }
 
-        #preview, #annotated-image {
-            width: 100%;
-            height: auto;
-            max-height: 500px;
-            object-fit: contain;
-            border-radius: var(--border-radius);
-            display: none;
+        .split-line .word {
+            display: inline-block;
         }
 
-        #camera {
-            width: 100%;
-            max-height: 500px;
-            border-radius: var(--border-radius);
-            display: none;
+        .hl-yellow {
+            background: var(--yellow);
+            padding: 2px 8px;
         }
 
-        .results-container {
-            margin-top: 1.5rem;
+        .hl-orange {
+            background: var(--orange);
+            color: var(--white);
+            padding: 2px 8px;
         }
 
-        #detected-items {
-            background: var(--secondary-color);
-            padding: 1.5rem;
-            border-radius: var(--border-radius);
-            margin-bottom: 1.5rem;
+        .hero-desc {
+            font-size: 1.2rem;
+            font-weight: 600;
+            line-height: 1.5;
+            margin-bottom: 40px;
+            padding-left: 18px;
+            border-left: 5px solid var(--black);
+            color: #333;
         }
 
-        #nutrition-info {
-            font-family: 'Courier New', monospace;
-            background: var(--secondary-color);
-            padding: 1.5rem;
-            border-radius: var(--border-radius);
-            white-space: pre-wrap;
-            font-size: 0.9rem;
-            line-height: 1.6;
-            overflow-x: auto;
+        .hero-img-wrap {
+            position: relative;
+            padding: 20px 20px 0 20px;
         }
 
-        .loading {
-            display: none;
+        .accuracy-tag {
+            position: absolute;
+            top: -5px;
+            right: 0px;
+            background: var(--yellow);
+            border: 3px solid var(--black);
+            box-shadow: 4px 4px 0 var(--black);
+            padding: 12px 20px;
+            font-weight: 900;
+            font-size: 1.1rem;
             text-align: center;
-            padding: 2rem;
+            line-height: 1.1;
+            transform: rotate(4deg);
+            z-index: 5;
         }
 
-        .loading i {
-            color: var(--primary-color);
+        .hero-img {
+            width: 100%;
+            height: 460px;
+            object-fit: cover;
+            filter: grayscale(1) contrast(1.15);
+            display: block;
+        }
+
+        .scan-chip {
+            position: absolute;
+            bottom: 30px;
+            left: 40px;
+            background: var(--white);
+            border: 3px solid var(--black);
+            box-shadow: 5px 5px 0 var(--black);
+            padding: 18px 22px;
+        }
+
+        .scan-chip-label {
+            font-weight: 900;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .scan-bar {
+            width: 130px;
+            height: 14px;
+            border: 2px solid var(--black);
+        }
+
+        .scan-fill {
+            width: 0%;
+            height: 100%;
+            background: var(--orange);
+        }
+
+        /* === ENGINE ROOM === */
+        .engine-section {
+            max-width: 1280px;
+            margin: 100px auto;
+            padding: 0 30px;
+        }
+
+        .section-title {
+            display: inline-block;
+            background: var(--yellow);
+            border: var(--border);
+            box-shadow: 8px 8px 0 var(--black);
+            padding: 14px 36px;
             font-size: 2rem;
-            animation: spin 1s linear infinite;
+            font-weight: 900;
+            text-transform: uppercase;
+            margin-bottom: 40px;
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
         }
 
-        @media (max-width: 1024px) {
-            .container {
+        .feature-card {
+            padding: 36px;
+        }
+
+        .feature-icon-box {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid var(--black);
+            font-size: 1.4rem;
+            margin-bottom: 22px;
+            background: var(--orange);
+            color: var(--white);
+        }
+
+        .feature-card:nth-child(2) .feature-icon-box {
+            background: var(--black);
+        }
+
+        .feature-card:nth-child(3) .feature-icon-box {
+            background: var(--yellow);
+            color: var(--black);
+        }
+
+        .feature-card h3 {
+            font-size: 1.3rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .feature-card p {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: #444;
+        }
+
+        /* === PROTOCOL === */
+        .protocol-section {
+            max-width: 1280px;
+            margin: 100px auto;
+            padding: 0 30px;
+        }
+
+        .protocol-inner {
+            padding: 50px;
+        }
+
+        .protocol-title {
+            font-size: 2.2rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .protocol-rule {
+            height: 5px;
+            background: var(--black);
+            margin-bottom: 50px;
+            transform-origin: left;
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .step-card {
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .step-card::before {
+            content: attr(data-num);
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            font-size: 7rem;
+            font-weight: 900;
+            color: rgba(0, 0, 0, 0.07);
+            line-height: 1;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .step-card h4 {
+            font-size: 1.2rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            position: relative;
+        }
+
+        .step-card p {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: #444;
+            position: relative;
+        }
+
+        .step-card.active-step {
+            background: var(--yellow);
+        }
+
+        /* === FOOTER === */
+        footer {
+            background: var(--black);
+            color: var(--white);
+            padding: 50px 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 80px;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--white);
+            font-weight: 900;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            text-decoration: none;
+            margin-bottom: 8px;
+        }
+
+        .footer-logo .logo-icon {
+            background: var(--orange);
+        }
+
+        .footer-tagline {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #888;
+        }
+
+        .copyright {
+            background: var(--yellow);
+            color: var(--black);
+            padding: 10px 24px;
+            font-weight: 900;
+            font-size: 0.9rem;
+            border: 3px solid var(--white);
+        }
+
+        /* === GSAP initial states === */
+        .gsap-fade-up {
+            opacity: 0;
+            transform: translateY(50px);
+        }
+
+        .gsap-fade-left {
+            opacity: 0;
+            transform: translateX(-60px);
+        }
+
+        .gsap-fade-right {
+            opacity: 0;
+            transform: translateX(60px);
+        }
+
+        nav {
+            opacity: 0;
+        }
+
+        /* === RESPONSIVE === */
+        @media (max-width: 1100px) {
+            h1 {
+                font-size: 3rem;
+            }
+
+            .hero {
                 grid-template-columns: 1fr;
             }
 
-            .main-container {
-                padding: 1rem;
+            .features-grid {
+                grid-template-columns: 1fr;
             }
 
-            .panel {
-                padding: 1.5rem;
+            .steps-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
-<body>
-    <div class="main-container">
-        <h1><i class="fas fa-utensils"></i> Food Detection System</h1>
-        
-        <div class="container">
-            <div class="panel">
-                <div class="panel-header">
-                    <h2><i class="fas fa-camera"></i> Image Input</h2>
-                </div>
-                <div class="upload-area" id="upload-area">
-                    <div class="button-group">
-                        <label class="custom-file-upload">
-                            <input type="file" id="fileInput" accept="image/*" capture="environment">
-                            <i class="fas fa-upload"></i> Upload Image
-                        </label>
-                        <button onclick="activateCamera()">
-                            <i class="fas fa-camera"></i> Use Camera
-                        </button>
-                    </div>
-                    <p>Drop your image here or click to upload</p>
-                </div>
-                <div class="image-container">
-                    <video id="camera"></video>
-                    <button id="capture" style="display: none;">
-                        <i class="fas fa-camera"></i> Take Photo
-                    </button>
-                    <canvas id="canvas" style="display: none;"></canvas>
-                    <img id="preview">
-                    <div class="loading">
-                        <i class="fas fa-spinner"></i>
-                        <p>Processing image...</p>
-                    </div>
-                </div>
-            </div>
 
-            <div class="panel">
-                <div class="panel-header">
-                    <h2><i class="fas fa-chart-pie"></i> Analysis Results</h2>
-                </div>
-                <div class="image-container">
-                    <img id="annotated_image">
-                </div>
-                <div class="results-container">
-                    <div id="detected-items"></div>
-                    <h3><i class="fas fa-info-circle"></i> Nutrition Information</h3>
-                    <pre id="nutrition-info"></pre>
+<body>
+
+    <nav id="main-nav">
+        <a href="/" class="logo">
+            <div class="logo-icon"><i class="fas fa-utensils"></i></div>
+            NutriScan&nbsp;<span style="color:var(--orange)">AI</span>
+        </a>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="hero-left card gsap-fade-left" id="hero-card">
+            <h1 id="hero-h1">
+                <span class="split-line"><span class="word">Scan your</span></span>
+                <span class="split-line"><span class="word hl-yellow">Meal</span></span>
+                <span class="split-line"><span class="word">Know your</span></span>
+                <span class="split-line"><span class="word hl-orange">Fuel</span></span>
+            </h1>
+            <p class="hero-desc gsap-fade-up" id="hero-desc">
+                Aggressive AI nutrition tracking. No manual typing. No hidden fluff. Pure data for your gains.
+            </p>
+            <a href="/analyze" class="btn btn-orange gsap-fade-up" id="hero-btn"
+                style="font-size:1.4rem; padding:20px 40px;">
+                <i class="fas fa-camera"></i> SCAN YOUR MEAL
+            </a>
+        </div>
+
+        <div class="hero-img-wrap gsap-fade-right" id="hero-right">
+            <div class="accuracy-tag" id="accuracy-tag">99.8%<br>ACCURATE</div>
+            <div class="card" style="overflow:hidden; position:relative;">
+                <img class="hero-img"
+                    src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=1200&q=80"
+                    alt="Healthy bowl with fruit and grains">
+                <div class="scan-chip" id="scan-chip">
+                    <div class="scan-chip-label">AI Scanning...</div>
+                    <div class="scan-bar">
+                        <div class="scan-fill" id="scan-fill"></div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
+
+    <!-- ENGINE ROOM -->
+    <section class="engine-section">
+        <div class="section-title gsap-fade-up">THE ENGINE ROOM</div>
+        <div class="features-grid">
+            <div class="feature-card card gsap-fade-up">
+                <div class="feature-icon-box"><i class="fas fa-bolt"></i></div>
+                <h3>HYPER SPEED</h3>
+                <p>200ms detection time. We don't waste your time. You eat, we track.</p>
+            </div>
+            <div class="feature-card card gsap-fade-up">
+                <div class="feature-icon-box"><i class="fas fa-bullseye"></i></div>
+                <h3>MACRO HARDCORE</h3>
+                <p>The most precise protein, carb, and fat calculation engine ever built.</p>
+            </div>
+            <div class="feature-card card gsap-fade-up">
+                <div class="feature-icon-box"><i class="fas fa-flask"></i></div>
+                <h3>BIO-ANALYSIS</h3>
+                <p>Deep dives into micronutrients and bioavailability of your ingredients.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- PROTOCOL -->
+    <section class="protocol-section">
+        <div class="protocol-inner card">
+            <div class="protocol-title gsap-fade-up">PROTOCOL</div>
+            <div class="protocol-rule" id="protocol-rule"></div>
+            <div class="steps-grid">
+                <div class="step-card card gsap-fade-up" data-num="01">
+                    <h4>AIM &amp; SHOOT</h4>
+                    <p>Capture any plate, any light, any angle. Our AI thrives on complexity.</p>
+                </div>
+                <div class="step-card card active-step gsap-fade-up" data-num="02">
+                    <h4>QUANTIFY</h4>
+                    <p>Volume estimation and ingredient segmentation happens in the cloud.</p>
+                </div>
+                <div class="step-card card gsap-fade-up" data-num="03">
+                    <h4>EXECUTE</h4>
+                    <p>Data is logged. Goals are updated. You are one step closer to peak health.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="gsap-fade-up">
+        <div>
+            <a href="/" class="footer-logo">
+                <div class="logo-icon"><i class="fas fa-utensils"></i></div>
+                NutriScan AI
+            </a>
+            <div class="footer-tagline">PRECISION FUEL FOR HIGH-PERFORMERS.</div>
+        </div>
+        <div class="copyright">© 2026 NUTRISCAN AI</div>
+    </footer>
 
     <script>
-        let stream = null;
-        const loading = document.querySelector('.loading');
-        const uploadArea = document.getElementById('upload-area');
-        const previewImg = document.getElementById('preview');
-        const annotatedImg = document.getElementById('annotated_image');
-        const canvas = document.getElementById('canvas');
-        const context = canvas.getContext('2d');
-
-        // Drag and drop handling
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.style.borderColor = '#4cc9f0';
-            uploadArea.style.background = '#f0f7ff';
+        /* =============================================
+           LENIS — smooth scroll
+           ============================================= */
+        const lenis = new Lenis({
+            duration: 1.2,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            smoothWheel: true,
         });
 
-        uploadArea.addEventListener('dragleave', (e) => {
-            e.preventDefault();
-            uploadArea.style.borderColor = '';
-            uploadArea.style.background = '';
+        gsap.registerPlugin(ScrollTrigger);
+
+        gsap.ticker.add((time) => lenis.raf(time * 1000));
+        gsap.ticker.lagSmoothing(0);
+
+        lenis.on('scroll', ScrollTrigger.update);
+
+        /* =============================================
+           NAV entrance
+           ============================================= */
+        gsap.to('#main-nav', {
+            opacity: 1,
+            duration: 0.8,
+            ease: 'power2.out',
+            delay: 0.1,
         });
 
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.style.borderColor = '';
-            uploadArea.style.background = '';
-            
-            const file = e.dataTransfer.files[0];
-            if (file && file.type.startsWith('image/')) {
-                handleImageFile(file);
-            }
+        /* =============================================
+           HERO — staggered word reveal
+           ============================================= */
+        const heroTl = gsap.timeline({ delay: 0.3 });
+
+        heroTl.to('#hero-card', {
+            opacity: 1, x: 0, duration: 0.9, ease: 'power3.out',
         });
 
-        // File upload handling
-        document.getElementById('fileInput').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                handleImageFile(file);
-            }
+        heroTl.from('#hero-h1 .word', {
+            yPercent: 120,
+            opacity: 0,
+            stagger: 0.12,
+            duration: 0.7,
+            ease: 'power3.out',
+        }, '-=0.5');
+
+        heroTl.to('#hero-desc', {
+            opacity: 1, y: 0, duration: 0.6, ease: 'power2.out',
+        }, '-=0.2');
+
+        heroTl.to('#hero-btn', {
+            opacity: 1, y: 0, duration: 0.5, ease: 'back.out(1.4)',
+        }, '-=0.2');
+
+        heroTl.to('#hero-right', {
+            opacity: 1, x: 0, duration: 0.9, ease: 'power3.out',
+        }, '-=0.8');
+
+        heroTl.from('#accuracy-tag', {
+            scale: 0, rotation: 20, opacity: 0, duration: 0.5, ease: 'back.out(2)',
+        }, '-=0.3');
+
+        heroTl.from('#scan-chip', {
+            y: 30, opacity: 0, duration: 0.5, ease: 'power2.out',
+        }, '-=0.2');
+
+        heroTl.to('#scan-fill', {
+            width: '62%', duration: 1.5, ease: 'power2.inOut',
+        }, '-=0.1');
+
+        /* =============================================
+           ENGINE ROOM — stagger on scroll
+           ============================================= */
+        gsap.utils.toArray('.engine-section .gsap-fade-up').forEach((el, i) => {
+            gsap.to(el, {
+                scrollTrigger: { trigger: el, start: 'top 88%', toggleActions: 'play none none none' },
+                opacity: 1, y: 0,
+                duration: 0.7,
+                delay: i * 0.12,
+                ease: 'power3.out',
+            });
         });
 
-        function handleImageFile(file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                previewImg.src = e.target.result;
-                previewImg.style.display = 'block';
-                processImage(file);
-            }
-            reader.readAsDataURL(file);
-        }
-
-        async function activateCamera() {
-            try {
-                stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: 'environment' } 
+        /* =============================================
+           Feature card 3D tilt on hover
+           ============================================= */
+        document.querySelectorAll('.feature-card').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const r = card.getBoundingClientRect();
+                const x = (e.clientX - r.left) / r.width - 0.5;
+                const y = (e.clientY - r.top) / r.height - 0.5;
+                gsap.to(card, {
+                    rotateY: x * 8, rotateX: -y * 8, scale: 1.02,
+                    duration: 0.4, ease: 'power2.out', transformPerspective: 800,
                 });
-                const video = document.getElementById('camera');
-                video.srcObject = stream;
-                video.style.display = 'block';
-                document.getElementById('capture').style.display = 'block';
-                previewImg.style.display = 'none';
-                await video.play();
-            } catch (err) {
-                console.error('Error accessing camera:', err);
-                alert('Error accessing camera. Please make sure you have granted camera permissions.');
-            }
-        }
-
-        document.getElementById('capture').addEventListener('click', async function() {
-            const video = document.getElementById('camera');
-            
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
-            
-            canvas.toBlob(async function(blob) {
-                const file = new File([blob], "camera-capture.jpg", { type: "image/jpeg" });
-                
-                previewImg.src = URL.createObjectURL(blob);
-                previewImg.style.display = 'block';
-                
-                if (stream) {
-                    stream.getTracks().forEach(track => track.stop());
-                    video.style.display = 'none';
-                    document.getElementById('capture').style.display = 'none';
-                }
-                
-                await processImage(file);
-            }, 'image/jpeg', 0.8);
+            });
+            card.addEventListener('mouseleave', () => {
+                gsap.to(card, {
+                    rotateY: 0, rotateX: 0, scale: 1,
+                    duration: 0.5, ease: 'elastic.out(1, 0.5)',
+                });
+            });
         });
 
-        async function processImage(file) {
-            try {
-                loading.style.display = 'block';
-                const formData = new FormData();
-                formData.append('file', file);
+        /* =============================================
+           PROTOCOL — rule draws, then cards cascade
+           ============================================= */
+        const protocolTl = gsap.timeline({
+            scrollTrigger: { trigger: '.protocol-section', start: 'top 80%' }
+        });
 
-                const response = await fetch('/detect', {
-                    method: 'POST',
-                    body: formData
-                });
+        protocolTl.to('.protocol-title.gsap-fade-up', {
+            opacity: 1, y: 0, duration: 0.6, ease: 'power3.out',
+        });
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
+        protocolTl.from('#protocol-rule', {
+            scaleX: 0, transformOrigin: 'left center', duration: 0.8, ease: 'power2.inOut',
+        }, '-=0.2');
 
-                const data = await response.json();
-                handleResponse(data);
-            } catch (error) {
-                handleError(error);
-            } finally {
-                loading.style.display = 'none';
-            }
-        }
+        protocolTl.to('.step-card.gsap-fade-up', {
+            opacity: 1, y: 0, stagger: 0.15, duration: 0.65, ease: 'power3.out',
+        }, '-=0.3');
 
-        function handleResponse(data) {
-            if (data.error) {
-                console.error('Error:', data.error);
-                alert(data.error);
-                return;
-            }
+        /* =============================================
+           FOOTER
+           ============================================= */
+        gsap.to('footer.gsap-fade-up', {
+            scrollTrigger: { trigger: 'footer', start: 'top 90%' },
+            opacity: 1, y: 0, duration: 0.8, ease: 'power2.out',
+        });
 
-            if (data.annotated_image) {
-                annotatedImg.src = `data:image/jpeg;base64,${data.annotated_image}`;
-                annotatedImg.style.display = 'block';
-            }
-
-            if (data.detected_items) {
-                document.getElementById('detected-items').innerHTML = `
-                    <h3><i class="fas fa-tag"></i> Detected Items:</h3>
-                    <p>${data.detected_items.join(', ')}</p>
-                `;
-            }
-
-            if (data.nutrition_info) {
-                document.getElementById('nutrition-info').textContent = data.nutrition_info;
-            }
-        }
-
-        function handleError(error) {
-            console.error('Error:', error);
-            document.getElementById('nutrition-info').textContent = 'Error processing image. Please try again.';
-            alert('Error processing image. Please try again.');
-        }
+        /* =============================================
+           Scan bar infinite pulse
+           ============================================= */
+        setTimeout(() => {
+            gsap.to('#scan-fill', {
+                width: '85%', duration: 2, ease: 'power1.inOut', yoyo: true, repeat: -1,
+            });
+        }, 3500);
     </script>
+
 </body>
+
 </html>

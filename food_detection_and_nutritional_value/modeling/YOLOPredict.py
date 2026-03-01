@@ -20,8 +20,9 @@ class YOLOInference:
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
         print(f"Using device: {self.device}")
         
-        # Load YOLO model
-        self.model = YOLO(model_path)
+        # Load YOLO model - Using World model for open-vocabulary food detection
+        self.model = YOLO('yolov8s-world.pt')
+        self.model.set_classes(['french fries', 'pancake', 'lettuce', 'strawberry', 'blueberry', 'burger', 'pizza', 'sandwich', 'salad', 'bread', 'fry', 'egg', 'banana', 'apple'])
         self.conf_threshold = conf_threshold
         
     def process_image(self, image_path):
@@ -47,8 +48,9 @@ class YOLOInference:
         if image is None:
             raise ValueError(f"Could not process image input: {image_path}")
             
-        # Run inference
-        results = self.model(image)[0]
+        # Run inference - optimized settings to catch subtle items like pancakes and berries
+        # Using 320 as it provides a compromise for both small and large objects in this model
+        results = self.model(image, imgsz=320, conf=0.02)[0]
         
         # Process results
         detections = []

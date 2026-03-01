@@ -1,0 +1,8 @@
+Pancakes:
+Calories: 389
+Protein: 15g
+Carbs: 14g
+Fat: 9g
+Apple:
+Calories: 3.2g
+Protein: 1.4g

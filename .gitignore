@@ -1,0 +1,23 @@
+# ── Model weight files (too large for GitHub's 100MB limit) ──
+*.pt
+*.pth
+*.onnx
+*.bin
+*.safetensors
+
+# ── Uploaded images (runtime files, not source code) ──
+uploads/raw/*
+!uploads/raw/.gitkeep
+
+# ── Python cache ──
+__pycache__/
+*.pyc
+*.pyo
+
+# ── Jupyter / notebook checkpoints ──
+.ipynb_checkpoints/
+
+# ── OS / editor ──
+.DS_Store
+.env
+*.log

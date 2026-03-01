@@ -7,16 +7,14 @@ from PIL import Image
 from food_detection_and_nutritional_value.modeling import LLAMA, YOLOPredict
 
 
-def main(image):
-    # Example usage
-    model_path = "models/last (1) (1).pt"
-    input_directory = "data/raw/archive (1)"
-    output_directory = "data/processed"
+# Initialize models once at startup
+print("Loading models...")
+model_path = "models/last (1) (1).pt"
+detector = YOLOPredict.YOLOInference(model_path)
+llama = LLAMA.llamaOutput()
+print("Models loaded successfully.")
 
-    # Initialize detector
-    detector = YOLOPredict.YOLOInference(model_path)
-    llama = LLAMA.llamaOutput()
-    
+def main(image):
     # Process image
     result = detector.process_image(image)
     
@@ -24,63 +22,69 @@ def main(image):
     response = {
         'detected_items': [],
         'nutrition_info': '',
-        'annotated_image': ''
+        'annotated_image': '',
+        'detections_raw': []
     }
     
     processed_img = result[0]  # This should be a numpy array from YOLO
     
     if detections:
         # Process detections
+        all_nutrition = []
+        unique_classes = set()
+        
         for det in detections:
-            print(f"s- {det['class']}: {det['score']:.2f}")
-            print(f"Getting Nutritional information for {det['class']}")
-            nutrition = llama.nutrition_from_yolo_pred_class(det['class'])
-            formatted_table = llama.parse_nutrition_data(nutrition)
-            print(formatted_table)
-            response['detected_items'].append(det['class'])
-            response['nutrition_info'] = formatted_table
+            class_name = det['class']
+            print(f"s- {class_name}: {det['score']:.2f}")
+            
+            # Record detection for UI markers
+            response['detections_raw'].append({
+                'class': class_name,
+                'score': float(det['score'])
+            })
+            
+            # Only process nutrition info once per unique food type
+            if class_name not in unique_classes:
+                print(f"Getting Nutritional information for {class_name}")
+                nutrition = llama.nutrition_from_yolo_pred_class(class_name)
+                formatted_table = llama.parse_nutrition_data(nutrition)
+                
+                response['detected_items'].append(class_name)
+                all_nutrition.append(f"Nutritional Value for {class_name}:\n{formatted_table}")
+                unique_classes.add(class_name)
+        
+        response['nutrition_info'] = "\n\n".join(all_nutrition)
         
         # Convert numpy array to image and then to base64
         try:
-            # # Convert numpy array to PIL Image
-            # if isinstance(processed_img, np.ndarray):
-            #     img_pil = Image.fromarray(processed_img)
-            # else:
-            #     img_pil = processed_img
-            
-            # # Create a byte stream
-            # img_byte_arr = io.BytesIO()
-            
-            # # Save the image as JPEG to the byte stream
-            # img_pil.save(img_byte_arr, format='JPEG', quality=95)
-            
-            # # Get the byte array and encode it to base64
-            # img_byte_arr = img_byte_arr.getvalue()
-            # base64_str = base64.b64encode(img_byte_arr).decode('utf-8')
-            
-            # response['annotated_image'] = base64_str
-             # Convert numpy array to PIL Image
+             # Convert numpy array (BGR) to PIL Image (RGB)
             if isinstance(processed_img, np.ndarray):
-                img_pil = Image.fromarray(processed_img)
+                # OpenCV handles BGR, PIL handles RGB
+                img_rgb = cv2.cvtColor(processed_img, cv2.COLOR_BGR2RGB)
+                img_pil = Image.fromarray(img_rgb)
             else:
                 img_pil = processed_img
-            # Resize the image to 128x128
-            resized_img = img_pil.resize((480, 480), Image.Resampling.LANCZOS)
+            # Resize image while maintaining aspect ratio
+            # Use 640 as a target max dimension for better display quality
+            # (Higher than 128 to look good in UI, even though model uses 128)
+            img_pil.thumbnail((640, 640), Image.Resampling.LANCZOS)
 
             # Save the resized image locally (optional)
-            resized_img.save("resized_annotated.jpg", format="JPEG", quality=95)
+            img_pil.save("resized_annotated.jpg", format="JPEG", quality=95)
 
             # Create a byte stream
             img_byte_arr = io.BytesIO()
 
             # Save the resized image as JPEG to the byte stream
-            resized_img.save(img_byte_arr, format='JPEG', quality=95)
+            img_pil.save(img_byte_arr, format='JPEG', quality=95)
 
             # Get the byte array and encode it to Base64
             img_byte_arr = img_byte_arr.getvalue()
             base64_str = base64.b64encode(img_byte_arr).decode('utf-8')
 
             response['annotated_image'] = base64_str
+            # Add all supported labels so the frontend can help the user
+            response['supported_foods'] = list(detector.model.names.values())
             
         except Exception as e:
             import traceback
@@ -90,6 +94,21 @@ def main(image):
     
     if not response['detected_items']:
         response['nutrition_info'] = 'No foods being detected!! :('
+        # Still return the image if it wasn't returned inside the detections block
+        if not response['annotated_image']:
+            try:
+                if isinstance(processed_img, np.ndarray):
+                    img_rgb = cv2.cvtColor(processed_img, cv2.COLOR_BGR2RGB)
+                    img_pil = Image.fromarray(img_rgb)
+                else:
+                    img_pil = processed_img
+                
+                img_byte_arr = io.BytesIO()
+                img_pil.save(img_byte_arr, format='JPEG', quality=95)
+                base64_str = base64.b64encode(img_byte_arr.getvalue()).decode('utf-8')
+                response['annotated_image'] = base64_str
+            except:
+                pass
     
     return response
             

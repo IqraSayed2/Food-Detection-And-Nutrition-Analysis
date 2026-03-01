@@ -27,6 +27,14 @@ def allowed_file(filename):
 def home():
     return render_template('index.html')
 
+@app.route('/analyze')
+def analyze_page():
+    return render_template('analyze.html')
+
+@app.route('/favicon.ico')
+def favicon():
+    return '', 204
+
 @app.route('/detect', methods=['POST'])
 def detect_food():
     try:
@@ -67,4 +75,4 @@ def detect_food():
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5001)
