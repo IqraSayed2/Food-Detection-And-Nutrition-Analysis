@@ -370,6 +370,3 @@ This project is part of an academic AI/ML demonstration. All third-party models 
 - [distilgpt2 License (MIT)](https://huggingface.co/distilgpt2)
 - [Open Food Facts License (Open Database License)](https://openfoodfacts.org/data)
 
----
-
-*Built with ⚡ by the NutriScan AI team.*
